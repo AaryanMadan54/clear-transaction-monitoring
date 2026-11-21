@@ -1,0 +1,17 @@
+institutions/
+BRIEF.html
+.DS_Store
+.env
+.env.*
+**/.env
+**/.env.*
+**/__pycache__/
+**/*.pyc
+system/reports/*
+!system/reports/verification.json
+!system/reports/integrity_summary.json
+output/*
+!output/bank.jsonl
+!output/emoney.jsonl
+!output/investment.jsonl
+!output/payments_fx.jsonl

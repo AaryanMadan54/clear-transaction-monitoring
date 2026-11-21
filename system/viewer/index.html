@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light"><title>Clear · Alert review</title>
+  <link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script>
+</head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="/" aria-label="Clear home"><span class="brand-mark">c<span></span></span><span>clear<span class="brand-period">.</span></span></a>
+  <div class="workspace-label">FINANCIAL CRIME WORKSPACE</div>
+  <div class="nav-label">Institutions <span>04</span></div>
+  <nav id="institutions" aria-label="Institutions"></nav>
+  <div class="sidebar-note"><span class="tiny-icon">✓</span><div>Evidence before action<p>Every alert. Every decision.<br>A traceable reason.</p></div></div>
+  <div class="sidebar-foot"><span class="local-dot"></span> Local workspace<span class="version">v1.0</span></div>
+</aside>
+<main>
+  <header class="topbar"><div>Operations <span>/</span> Transaction monitoring</div><div class="profile"><span>AR</span> Analyst workspace</div></header>
+  <div class="content">
+    <div class="page-heading"><div><div class="eyebrow">TRANSACTION MONITORING</div><h1>Every alert tells a story.</h1><p>Find the evidence. Resolve the uncertainty. Move the right cases forward.</p></div><button id="run" class="primary"><span class="play-icon">▷</span> Run all cases</button></div>
+    <div id="notice" class="notice" role="status" hidden></div>
+    <section class="metrics" aria-label="Case outcomes">
+      <div class="metric"><div class="metric-label">Cases reviewed <span>↗</span></div><div id="total" class="metric-value">—</div><div id="total-note" class="metric-note">Across four institutions</div></div>
+      <button class="metric" data-filter="CLOSE"><div class="metric-label"><span class="status-dot close"></span> Ready to close</div><div id="close" class="metric-value">—</div><div class="metric-note">Activity supported by evidence</div></button>
+      <button class="metric" data-filter="RFI"><div class="metric-label"><span class="status-dot rfi"></span> More information</div><div id="rfi" class="metric-value">—</div><div class="metric-note">A specific document or answer needed</div></button>
+      <button class="metric" data-filter="ESCALATE"><div class="metric-label"><span class="status-dot escalate"></span> MLRO review</div><div id="escalate" class="metric-value">—</div><div class="metric-note">Suspicion requires specialist review</div></button>
+    </section>
+    <section class="queue-panel">
+      <div class="queue-heading"><div><h2 id="queue-title">Case queue</h2><span id="institution-description">Choose an institution to review its cases</span></div><div class="queue-actions"><button id="policy" class="secondary">View policy</button><a id="export" class="secondary" href="#">Export JSONL <span>↓</span></a></div></div>
+      <div class="toolbar"><div class="filters" role="group" aria-label="Filter verdict"><button data-verdict="ALL" class="active">All cases <span id="all-count"></span></button><button data-verdict="CLOSE">Close</button><button data-verdict="RFI">RFI</button><button data-verdict="ESCALATE">Escalate</button></div><label class="search"><span>⌕</span><input id="search" type="search" placeholder="Search name, case or rule…" aria-label="Search cases"><kbd>/</kbd></label></div>
+      <div class="table-scroll"><table><thead><tr><th>Customer / case</th><th>Monitoring rules</th><th>Decision</th><th>Evidence</th><th>Reviewed through</th><th></th></tr></thead><tbody id="cases"></tbody></table></div>
+      <div class="table-footer"><span id="range">Loading cases…</span><div><button id="previous" class="pager" aria-label="Previous page">‹</button><span id="page">1 / 1</span><button id="next" class="pager" aria-label="Next page">›</button></div></div>
+    </section>
+    <footer class="page-footer"><span><span class="local-dot"></span> Supplied evidence only · No external identity searches</span><span id="runtime">Local policy engine</span></footer>
+    <p class="data-note">Synthetic hackathon data. Outcome counts describe system decisions; accuracy has not been measured against answer labels.</p>
+  </div>
+</main>
+<dialog id="detail-dialog" class="detail-dialog"><div id="detail"></div></dialog>
+<dialog id="document-dialog" class="document-dialog"><div class="modal-header"><div><span class="eyebrow">ORIGINAL EVIDENCE</span><h2 id="document-title"></h2></div><button id="close-document" class="icon-button" aria-label="Close document">×</button></div><pre id="document-content"></pre></dialog>
+<dialog id="policy-dialog" class="document-dialog"><div class="modal-header"><div><span class="eyebrow">INSTITUTION SOP</span><h2 id="policy-title"></h2></div><button id="close-policy" class="icon-button" aria-label="Close policy">×</button></div><pre id="policy-content"></pre></dialog>
+</body></html>

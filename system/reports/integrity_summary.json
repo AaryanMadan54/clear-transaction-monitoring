@@ -1,0 +1,31 @@
+{
+  "tests": 64,
+  "scope": "Evidence-date/reference linkage, single-use evidence capacity and whole-case single-item RFI resolution",
+  "institutions": [
+    {
+      "institution": "bank",
+      "changed_verdicts": 0,
+      "transitions": {}
+    },
+    {
+      "institution": "emoney",
+      "changed_verdicts": 6,
+      "transitions": {
+        "CLOSE -> RFI": 6
+      }
+    },
+    {
+      "institution": "investment",
+      "changed_verdicts": 0,
+      "transitions": {}
+    },
+    {
+      "institution": "payments_fx",
+      "changed_verdicts": 30,
+      "transitions": {
+        "RFI -> ESCALATE": 30
+      }
+    }
+  ],
+  "accuracy": "not measured; development data has no reference labels"
+}
