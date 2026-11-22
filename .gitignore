@@ -15,3 +15,6 @@ output/*
 !output/emoney.jsonl
 !output/investment.jsonl
 !output/payments_fx.jsonl
+
+/submission.zip
+/development/package_submission.py

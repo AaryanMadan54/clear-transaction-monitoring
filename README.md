@@ -1,22 +1,31 @@
-# Clear: transaction monitoring review
+# Clear: evidence-backed transaction monitoring
 
-Hackathon submission: a policy engine with guarded optional AI review through OpenRouter and a local analyst dashboard. Standard-library Python; no dependencies.
+A standard-library Python app for reviewing bank, e-money, investment and payments/FX cases, with a local analyst dashboard and guarded AI review using **OpenRouter or xAI**.
+
+Clone the source and use Python 3.10 or newer. No packages, database or build step are required. The institution input data is excluded from Git; place the supplied folders under `institutions/bank`, `institutions/emoney`, `institutions/investment` and `institutions/payments_fx`.
 
 ```powershell
 python system/run institutions/bank output/bank.jsonl
 python system/serve.py
 ```
 
-For AI-assisted adjudication, set `OPENROUTER_API_KEY` in your terminal and run:
+Open the dashboard at http://127.0.0.1:8765. Rules mode is the default and makes no model calls.
+
+For AI-assisted review with xAI, put `XAI_API_KEY=your-key` in a local `.env` or `.env.txt` file, or set it in your terminal. These files are ignored by Git. Then run:
 
 ```powershell
-python system/run institutions/bank output/bank.jsonl --mode hybrid
+python system/run institutions/bank output/bank-ai.jsonl --mode hybrid --provider xai
+python system/serve.py --provider xai
 ```
 
-Default model: `google/gemini-2.5-flash-lite`. Default mode is rules. AI requires a funded OpenRouter account; HTTP 402 retains the baseline result. Credentials and supplied institution input data are excluded from this repository. Place the hackathon input folders under `institutions/` to run locally.
+For OpenRouter, set `OPENROUTER_API_KEY` and use `--provider openrouter`. The default models are `grok-4.3` for xAI and `google/gemini-2.5-flash-lite` for OpenRouter. An explicit `--env-file` can select another local credential file. Process environment variables take precedence. There is no automatic provider fallback after an API error.
 
-Download `submission.zip` for the packaged system and all four 1,000-case development outputs. See [system/README.md](system/README.md) for policy boundaries, run commands, validation and limitations. Development accuracy is unmeasured because no reference labels were supplied.
+Run the tests:
 
-For an explicitly separate xAI development check with a local credential file, see [development/README.md](development/README.md). The shared review pipeline has live smoke tests; the judged runner continues to use OpenRouter only.
+```powershell
+python -m unittest discover -s system -p "test*.py"
+```
 
-Validation: 87 synthetic tests; all 4,000 saved development outputs validated; 30 successful live development-provider reviews across the four institutions. These checks establish integration and policy boundaries, not classification accuracy. OpenRouter generation is still blocked by account HTTP 402.
+Validation includes 91 synthetic tests, all 4,000 saved development outputs and 30 successful live reviews through xAI. Smoke tests establish integration and policy boundaries; reference labels are absent, so classification accuracy remains unmeasured. The supplied OpenRouter account still returns HTTP 402; failures retain baseline decisions.
+
+See [system/README.md](system/README.md) for policy guards, budgets, audit records and verification, and [development/README.md](development/README.md) for additional smoke checks. This repository contains the runnable source directly.

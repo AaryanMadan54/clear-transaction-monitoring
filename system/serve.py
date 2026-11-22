@@ -15,7 +15,8 @@ from urllib.parse import parse_qs, urlparse
 
 from domain import Institution, validate_result
 from engine import evaluate
-from model import DEFAULT_MODEL, ModelReview
+from model import ModelReview
+from configuration import PROVIDERS, load_environment, selected_provider
 
 SYSTEM = Path(__file__).resolve().parent
 NAMES = {"bank": "Bank", "emoney": "E-money", "investment": "Investment", "payments_fx": "Payments & FX"}
@@ -52,7 +53,9 @@ class Store:
             metrics_path = SYSTEM / "reports" / (name + ".metrics.json")
             metrics = json.loads(metrics_path.read_text(encoding="utf-8")) if metrics_path.exists() else {}
             rows.append({"id": name, "label": label, "cases": len(outputs), "counts": counts, "metrics": metrics})
-        return {"institutions": rows, "model_available": bool(os.environ.get("OPENROUTER_API_KEY")), "model": os.environ.get("TM_MODEL", DEFAULT_MODEL), "job": self.job}
+        provider = selected_provider()
+        return {"institutions": rows, "model_available": bool(os.environ.get(PROVIDERS[provider]["key"])),
+                "provider": provider, "model": os.environ.get("TM_MODEL") or PROVIDERS[provider]["model"], "job": self.job}
 
     def cases(self, name):
         inst = self.institution(name)
@@ -179,8 +182,9 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == "/api/run":
                 return self.send(self.server.store.run(), 202)
             if self.path == "/api/review":
-                if not os.environ.get("OPENROUTER_API_KEY"):
-                    return self.send({"error": "Set OPENROUTER_API_KEY in the server environment to enable AI review"}, 409)
+                provider = selected_provider()
+                if not os.environ.get(PROVIDERS[provider]["key"]):
+                    return self.send({"error": "Set " + PROVIDERS[provider]["key"] + " to enable AI review"}, 409)
                 name, key = body.get("institution"), body.get("case_id")
                 inst = self.server.store.institution(name)
                 case = next((c for c in inst.cases if c["case_id"] == key), None)
@@ -188,7 +192,7 @@ class Handler(BaseHTTPRequestHandler):
                     raise ValueError("Case not found")
                 ctx = inst.context(case)
                 result, findings = evaluate(ctx)
-                review = ModelReview(model=os.environ.get("TM_MODEL", DEFAULT_MODEL), budget=0.10, max_calls=1).review(ctx, result, findings)
+                review = ModelReview(model=os.environ.get("TM_MODEL"), provider=provider, budget=0.10, max_calls=1).review(ctx, result, findings)
                 return self.send(review)
             self.send({"error": "Not found"}, 404)
         except (ValueError, KeyError, TypeError) as error:
@@ -199,7 +203,17 @@ def main():
     parser = argparse.ArgumentParser(description="Open the local alert-review dashboard")
     parser.add_argument("--workspace", type=Path, default=SYSTEM.parent)
     parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--provider", choices=["openrouter", "xai"])
+    parser.add_argument("--model")
+    parser.add_argument("--env-file", type=Path)
     args = parser.parse_args()
+    try:
+        load_environment(args.env_file)
+        os.environ["TM_PROVIDER"] = selected_provider(args.provider)
+    except (ValueError, OSError) as error:
+        parser.error(str(error))
+    if args.model:
+        os.environ["TM_MODEL"] = args.model
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     server.store = Store(args.workspace)
     print(f"Alert Review is running at http://127.0.0.1:{args.port}", flush=True)

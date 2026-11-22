@@ -1,5 +1,5 @@
 {
-  "synthetic_tests_passed": 87,
+  "synthetic_tests_passed": 91,
   "live_development_provider": "xai-development",
   "live_model": "grok-4.3",
   "live_reviews": 30,
@@ -77,7 +77,30 @@
     }
   },
   "openrouter_generation_verified": false,
-  "submission_endpoint": "https://openrouter.ai/api/v1/chat/completions",
-  "development_harness_excluded_from_submission": true,
-  "accuracy": "unmeasured: no reference labels supplied; smoke tests establish integration, not decision correctness"
+  "accuracy": "unmeasured: no reference labels supplied; smoke tests establish integration, not decision correctness",
+  "runtime_providers": [
+    "openrouter",
+    "xai"
+  ],
+  "source_distribution": true,
+  "openrouter_endpoint": "https://openrouter.ai/api/v1/chat/completions",
+  "integrated_cli_smoke": {
+    "cases": 10,
+    "provider": "xai",
+    "mode": "hybrid",
+    "model_calls": 3,
+    "model_review_statuses": {
+      "not_requested": 7,
+      "reviewed": 3
+    },
+    "model_errors": {},
+    "model_cost_usd": 0.057044
+  },
+  "integrated_dashboard_smoke": {
+    "provider": "xai",
+    "model_available": true,
+    "review_status": "reviewed",
+    "cost_usd": 0.018545,
+    "credentials_returned": false
+  }
 }

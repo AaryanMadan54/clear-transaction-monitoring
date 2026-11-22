@@ -7,7 +7,7 @@
       "fresh_runs": [
         {
           "sha256": "c0ea3ee8acad8358b77d2c8ba398f1cdf607348bab23d218cf9b2f1090bfc021",
-          "seconds": 5.789,
+          "seconds": 3.721,
           "cases": 200,
           "cost_usd": 0.0
         }
@@ -19,7 +19,7 @@
       "fresh_runs": [
         {
           "sha256": "08659c1e333298b40843f5cbe6a7f499ae19fc86ea486ce8a861e10ca5ccba25",
-          "seconds": 4.432,
+          "seconds": 3.87,
           "cases": 200,
           "cost_usd": 0.0
         }
@@ -31,7 +31,7 @@
       "fresh_runs": [
         {
           "sha256": "b7c1310c9e85ee0f14ddcafde29510cf61c3b998028c34a2cf13696fb3c4aa63",
-          "seconds": 1.834,
+          "seconds": 1.664,
           "cases": 200,
           "cost_usd": 0.0
         }
@@ -43,7 +43,7 @@
       "fresh_runs": [
         {
           "sha256": "9dd98f2944dccf50df67e0ab7d660e85256e7bd812c027677b5874fae30bb74b",
-          "seconds": 5.943,
+          "seconds": 2.941,
           "cases": 200,
           "cost_usd": 0.0
         }

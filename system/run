@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Submission entry point: run <institution folder> <output file>."""
+"""CLI entry point: run <institution folder> <output file>."""
 from pathlib import Path
 import sys
 

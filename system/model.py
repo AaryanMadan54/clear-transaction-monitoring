@@ -1,4 +1,4 @@
-"""Optional OpenRouter evidence review with budget, timeout and policy boundaries."""
+"""Optional AI evidence review with budget, timeout and policy boundaries."""
 from __future__ import annotations
 
 import json
@@ -15,6 +15,7 @@ from email.utils import parsedate_to_datetime
 
 from domain import Finding, REASON_CODES, SEVERITY, validate_result
 from engine import compose
+from configuration import PROVIDERS, selected_provider
 
 ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = "google/gemini-2.5-flash-lite"
@@ -155,19 +156,20 @@ def retry_delay(value):
 
 
 class ModelReview:
-    def __init__(self, model=DEFAULT_MODEL, budget=3.50, timeout=25, max_calls=200,
-                 provider="openrouter", input_rate=None, output_rate=None):
-        if provider != "openrouter":
-            raise ValueError("The submission supports OpenRouter only")
+    def __init__(self, model=None, budget=3.50, timeout=25, max_calls=200,
+                 provider=None, input_rate=None, output_rate=None):
+        provider = selected_provider(provider)
+        defaults = PROVIDERS[provider]
+        model = model or defaults["model"]
         self.provider, self.model = provider, model
-        self.key_variable = "OPENROUTER_API_KEY"
+        self.key_variable = defaults["key"]
         self.key = os.environ.get(self.key_variable, "").strip()
-        self.endpoint = ENDPOINT
-        if model != DEFAULT_MODEL and (input_rate is None and not os.environ.get("TM_INPUT_USD_PER_MILLION") or
+        self.endpoint = defaults["endpoint"]
+        if model != defaults["model"] and (input_rate is None and not os.environ.get("TM_INPUT_USD_PER_MILLION") or
                                        output_rate is None and not os.environ.get("TM_OUTPUT_USD_PER_MILLION")):
             raise ValueError("Custom models require TM_INPUT_USD_PER_MILLION and TM_OUTPUT_USD_PER_MILLION price ceilings")
-        self.input_rate = positive_decimal(input_rate if input_rate is not None else os.environ.get("TM_INPUT_USD_PER_MILLION", "0.10"), "Input rate")
-        self.output_rate = positive_decimal(output_rate if output_rate is not None else os.environ.get("TM_OUTPUT_USD_PER_MILLION", "0.40"), "Output rate")
+        self.input_rate = positive_decimal(input_rate if input_rate is not None else os.environ.get("TM_INPUT_USD_PER_MILLION", defaults["input_rate"]), "Input rate")
+        self.output_rate = positive_decimal(output_rate if output_rate is not None else os.environ.get("TM_OUTPUT_USD_PER_MILLION", defaults["output_rate"]), "Output rate")
         self.budget = positive_decimal(budget, "Budget", allow_zero=False)
         self.timeout = float(positive_decimal(timeout, "Timeout", allow_zero=False))
         if not isinstance(max_calls, int) or isinstance(max_calls, bool) or max_calls < 1:
@@ -188,6 +190,8 @@ class ModelReview:
         return other
 
     def request_options(self):
+        if self.provider == "xai":
+            return {"reasoning_effort": "none"}
         return {"seed": 0, "provider": {"allow_fallbacks": False, "require_parameters": True,
                 "max_price": {"prompt": float(self.input_rate), "completion": float(self.output_rate)}}}
 
@@ -241,7 +245,7 @@ class ModelReview:
         case_policy = status == 403 and re.search(r"moderat|content.policy|input.*flagged", str(detail.get("message", "")), re.I)
         if case_policy:
             code = "content_policy"
-        hints = {"billing": "Fund the OpenRouter account associated with this key or raise its credit limit",
+        hints = {"billing": "Fund the account associated with this key or raise its credit limit",
                  "authentication": "Check the configured API key", "permission": "Check model and account permissions",
                  "model_unavailable": "Check the model ID, structured-output support and configured price ceilings"}
         message = f"{self.provider} HTTP {status}: " + safe_message(detail.get("message") or "Request failed", self.key)

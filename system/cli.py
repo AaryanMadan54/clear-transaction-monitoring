@@ -12,7 +12,8 @@ from pathlib import Path
 
 from domain import Institution, validate_result
 from engine import evaluate
-from model import DEFAULT_MODEL, ModelReview, apply_review
+from model import ModelReview, apply_review
+from configuration import PROVIDERS, load_environment, selected_provider
 
 SYSTEM_DIR = Path(__file__).resolve().parent
 
@@ -25,21 +26,30 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Review all transaction-monitoring cases in an institution folder")
     parser.add_argument("institution_folder", type=Path)
     parser.add_argument("output_file", type=Path)
-    parser.add_argument("--mode", choices=["rules", "advisory", "hybrid"], default=os.environ.get("TM_MODE", "rules"),
+    parser.add_argument("--mode", choices=["rules", "advisory", "hybrid"],
                         help="rules: local policy engine; advisory: AI second opinion only; hybrid: guarded AI adjudication")
-    parser.add_argument("--model", default=os.environ.get("TM_MODEL", DEFAULT_MODEL))
-    parser.add_argument("--provider", choices=["openrouter"], default="openrouter",
-                        help="Model requests use OpenRouter exclusively")
+    parser.add_argument("--model")
+    parser.add_argument("--provider", choices=["openrouter", "xai"], help="Select the AI provider explicitly")
+    parser.add_argument("--env-file", type=Path, help="Optional environment file; otherwise .env and .env.txt are read")
     parser.add_argument("--budget", type=float, default=3.50, help="Conservative model spend ceiling per 200 cases, USD")
     parser.add_argument("--limit", type=int, help="Development benchmark only: process the first N cases")
     parser.add_argument("--no-audit", action="store_true")
     args = parser.parse_args(argv)
+    try:
+        load_environment(args.env_file)
+        args.provider = selected_provider(args.provider)
+    except (ValueError, OSError) as error:
+        parser.error(str(error))
+    args.mode = args.mode or os.environ.get("TM_MODE", "rules")
+    if args.mode not in {"rules", "advisory", "hybrid"}:
+        parser.error("TM_MODE must be rules, advisory or hybrid")
+    args.model = args.model or os.environ.get("TM_MODEL") or PROVIDERS[args.provider]["model"]
     started = time.perf_counter()
     if args.limit is not None and args.limit < 1:
         parser.error("--limit must be positive")
     if not 0 < args.budget <= 4:
         parser.error("--budget must be greater than zero and no more than $4 per 200 cases")
-    key_variable = "OPENROUTER_API_KEY"
+    key_variable = PROVIDERS[args.provider]["key"]
     if args.mode != "rules" and not os.environ.get(key_variable):
         parser.error("This model mode requires " + key_variable + "; use --mode rules to run locally")
     try:

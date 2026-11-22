@@ -1,4 +1,4 @@
-"""Explicit development-only xAI smoke run. Not included in submission.zip."""
+"""Bounded xAI smoke run using the regular model review pipeline."""
 from __future__ import annotations
 
 import argparse
@@ -27,15 +27,7 @@ def load_key(path):
 
 class DevelopmentReview(ModelReview):
     def __init__(self, budget=0.50, max_calls=12):
-        super().__init__(model="grok-4.3", input_rate="1.25", output_rate="2.50",
-                         budget=budget, max_calls=max_calls)
-        self.provider = "xai-development"
-        self.key_variable = "XAI_API_KEY"
-        self.key = os.environ.get(self.key_variable, "").strip()
-        self.endpoint = "https://api.x.ai/v1/chat/completions"
-
-    def request_options(self):
-        return {"reasoning_effort": "none"}
+        super().__init__(provider="xai", budget=budget, max_calls=max_calls)
 
 
 def main():
@@ -80,7 +72,7 @@ def main():
               "changed_verdicts": sum(r["result"]["verdict"] != r["baseline"]["verdict"] for r in rows),
               "calls": reviewer.calls, "cost_usd": float(reviewer.cost),
               "cost_upper_bound_usd": float(reviewer.reserved),
-              "accuracy": "unmeasured: no reference labels", "submission_endpoint_unchanged": True}
+              "accuracy": "unmeasured: no reference labels", "runtime_provider": "xai"}
     reports = ROOT / "system" / "reports"
     reports.mkdir(exist_ok=True)
     label = args.institution + (".financial" if args.financial_evidence else "")
