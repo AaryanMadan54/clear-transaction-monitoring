@@ -1,4 +1,4 @@
-# Clear: evidence-backed transaction monitoring
+#  Diligent Hackathon - Clear: evidence-backed transaction monitoring
 
 A standard-library Python app for reviewing bank, e-money, investment and payments/FX cases, with a local analyst dashboard and guarded AI review using **OpenRouter or xAI**.
 
