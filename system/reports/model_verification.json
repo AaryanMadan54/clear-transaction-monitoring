@@ -1,0 +1,83 @@
+{
+  "synthetic_tests_passed": 87,
+  "live_development_provider": "xai-development",
+  "live_model": "grok-4.3",
+  "live_reviews": 30,
+  "successful_live_reviews": 30,
+  "samples": [
+    {
+      "institution": "bank",
+      "financial_evidence_only": false,
+      "reviews": 6,
+      "successful_reviews": 6,
+      "changed_verdicts": 0,
+      "cost_usd": 0.11676625,
+      "all_results_validated": true
+    },
+    {
+      "institution": "emoney",
+      "financial_evidence_only": false,
+      "reviews": 6,
+      "successful_reviews": 6,
+      "changed_verdicts": 0,
+      "cost_usd": 0.10920125,
+      "all_results_validated": true
+    },
+    {
+      "institution": "investment",
+      "financial_evidence_only": false,
+      "reviews": 6,
+      "successful_reviews": 6,
+      "changed_verdicts": 0,
+      "cost_usd": 0.05755375,
+      "all_results_validated": true
+    },
+    {
+      "institution": "payments_fx",
+      "financial_evidence_only": false,
+      "reviews": 6,
+      "successful_reviews": 6,
+      "changed_verdicts": 0,
+      "cost_usd": 0.102585,
+      "all_results_validated": true
+    },
+    {
+      "institution": "payments_fx",
+      "financial_evidence_only": true,
+      "reviews": 6,
+      "successful_reviews": 6,
+      "changed_verdicts": 0,
+      "cost_usd": 0.1061875,
+      "all_results_validated": true
+    }
+  ],
+  "successful_sample_cost_usd": 0.492294,
+  "openrouter_smoke": {
+    "accuracy": "not measured: development cases have no answer labels",
+    "cases": 25,
+    "institution": "bank",
+    "mode": "hybrid",
+    "model_calls": 6,
+    "model_cost_upper_bound_usd": 0.0,
+    "model_cost_usd": 0.0,
+    "model_errors": {
+      "billing": 9
+    },
+    "model_review_statuses": {
+      "failed": 6,
+      "not_requested": 16,
+      "service_skipped": 3
+    },
+    "provider": "openrouter",
+    "seconds": 6.037,
+    "verdicts": {
+      "CLOSE": 12,
+      "ESCALATE": 8,
+      "RFI": 5
+    }
+  },
+  "openrouter_generation_verified": false,
+  "submission_endpoint": "https://openrouter.ai/api/v1/chat/completions",
+  "development_harness_excluded_from_submission": true,
+  "accuracy": "unmeasured: no reference labels supplied; smoke tests establish integration, not decision correctness"
+}

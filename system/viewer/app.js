@@ -103,7 +103,7 @@ document.addEventListener('click',async event=>{
     else if(b?.id==='policy'){const data=await api('/api/policy?institution='+state.institution);$('#policy-title').textContent=state.summary.institutions.find(i=>i.id===state.institution).label+' policy';$('#policy-content').textContent=data.policy;$('#policy-dialog').showModal();}
     else if(b?.id==='ai-review'){b.disabled=true;b.textContent='Reading the evidence…';const review=await api('/api/review',{institution:state.detail.institution,case_id:state.detail.case.case_id});$('#ai-result').textContent=review.status==='reviewed'?review.findings.map(f=>`${f.verdict} · ${f.reason_code}\n${f.detail}`).join('\n\n'):review.message;b.disabled=false;b.textContent='Review with AI';}
     else{const row=event.target.closest('[data-case]');if(row)await openCase(row.dataset.case);}
-  }catch(error){notice(error.message,true);if(b)b.disabled=false;}
+  }catch(error){notice(error.message,true);if(b){b.disabled=false;if(b.id==='ai-review')b.textContent='Review with AI';}}
 });
 $('#search').addEventListener('input',event=>{state.search=event.target.value.trim().toLowerCase();state.page=0;renderCases();});
 document.addEventListener('keydown',event=>{if(event.key==='/'&&!['INPUT','TEXTAREA'].includes(event.target.tagName)&&!document.querySelector('dialog[open]')){event.preventDefault();$('#search').focus();}const row=event.target.closest('[data-case]');if(row&&(event.key==='Enter'||event.key===' ')){event.preventDefault();openCase(row.dataset.case);}});

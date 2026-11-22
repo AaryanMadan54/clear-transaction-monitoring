@@ -42,6 +42,10 @@ def main(argv=None):
     key_variable = "OPENROUTER_API_KEY"
     if args.mode != "rules" and not os.environ.get(key_variable):
         parser.error("This model mode requires " + key_variable + "; use --mode rules to run locally")
+    try:
+        reviewer = ModelReview(args.model, args.budget, provider=args.provider) if args.mode != "rules" else None
+    except ValueError as error:
+        parser.error(str(error))
     institution = Institution(args.institution_folder)
     cases = sorted(institution.cases, key=lambda c: c["case_id"])
     if args.limit:
@@ -57,9 +61,10 @@ def main(argv=None):
         audit = (reports / (institution.name + ".audit.jsonl")).open("w", encoding="utf-8", newline="\n")
     counts = collections.Counter()
     review_counts = collections.Counter()
-    reviewer = ModelReview(args.model, args.budget, provider=args.provider) if args.mode != "rules" else None
     total_model_calls = 0
     total_model_cost = 0.0
+    total_model_reserved = 0.0
+    model_errors = collections.Counter()
     temporary = None
     try:
         # Atomic replacement prevents a failed run from leaving a misleading partially complete submission.
@@ -81,7 +86,8 @@ def main(argv=None):
                 if reviewer and start:
                     total_model_calls += reviewer.calls
                     total_model_cost += float(reviewer.cost)
-                    reviewer = ModelReview(args.model, args.budget, provider=args.provider)
+                    total_model_reserved += float(reviewer.reserved)
+                    reviewer = reviewer.next_block()
                 contexts = [institution.context(case) for case in cases[start:start + 200]]
                 # Six bounded workers keep a 200-case block below 30 minutes even if
                 # all 200 model requests exhaust the 25-second request timeout.
@@ -94,6 +100,8 @@ def main(argv=None):
                                                "checks": [f.as_dict() for f in findings], "model_review": review}) + "\n")
                         counts[result["verdict"]] += 1
                         review_counts[review["status"]] += 1
+                        if review.get("error_code"):
+                            model_errors[review["error_code"]] += 1
         # os.replace also works between volumes only when the OS permits it; full paths here normally share a volume.
         try:
             os.replace(temporary, output)
@@ -111,9 +119,12 @@ def main(argv=None):
     if reviewer:
         total_model_calls += reviewer.calls
         total_model_cost += float(reviewer.cost)
+        total_model_reserved += float(reviewer.reserved)
     report = {"institution": institution.name, "cases": len(cases), "mode": args.mode, "provider": args.provider,
               "verdicts": dict(sorted(counts.items())), "seconds": round(time.perf_counter() - started, 3),
               "model_calls": total_model_calls, "model_cost_usd": round(total_model_cost, 6),
+              "model_cost_upper_bound_usd": round(total_model_reserved, 6),
+              "model_errors": dict(sorted(model_errors.items())),
               "model_review_statuses": dict(sorted(review_counts.items())),
               "accuracy": "not measured: development cases have no answer labels"}
     if not args.no_audit:
